@@ -1,0 +1,26 @@
+Perform Contrast stretching on a gray image and show its histogram.
+
+Main Script:-
+inputImage=imread('cat.png');
+gry=convertToGray(inputImage);
+gryStretched=performContrastStretch(gry,50,180);
+hist_gry=getNormalizedHistogram(gry);
+hist_gryStreatched=getNormalizedHistogram(gryStretched);
+subplot(2,2,1),imshow(gry),title("Gray Image");
+subplot(2,2,2),plot(hist_gry),title("Hisogram before streatching");
+subplot(2,2,3),imshow(gryStretched),title("Streatched Image");
+subplot(2,2,4),plot(hist_gryStreatched),title("Hisogram after streatching");
+
+All helper functions:-
+function result=performContrastStretch(inputImage,m,n)
+ inputImage=double(inputImage);
+ result=inputImage;
+ a=min(min(inputImage));
+ b=max(max(inputImage));
+ for i=1:size(inputImage,1)
+ for j=1:size(inputImage,2)
+ result(i,j)=m+(((n-m)/(b-a))*(inputImage(i,j)-a));
+ end
+ end
+ result=uint8(result);
+end

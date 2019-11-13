@@ -1,0 +1,45 @@
+Perform image enhancement of a gray scale image histogram equalization technique.
+
+Main Script:-
+inputImage=imread('cat.png');
+gry=convertToGray(inputImage);
+% Step 1: Get normalized histogram of image
+hist_original=getNormalizedHistogram(gry);
+% Step 2: Find CDF
+cdf=getCDF(hist_original);
+% Step 3: Find new intensity
+cdf=1+round(cdf*255);
+% Step 4: Find equalized image based on cdf and old image
+equalized_image=getEqualizedImage(gry,cdf);
+% Post Calculations and subplot
+hist_equalized=getNormalizedHistogram(equalized_image);
+subplot(6,1,1),imshow(gry),title('Original Image');
+subplot(6,1,2),plot(hist_original),title('Normalized Histogram of Original
+Image');
+subplot(6,1,3),plot(cdf),title('CDF');
+subplot(6,1,4),imshow(equalized_image),title('Equalized Image');
+subplot(6,1,5),plot(hist_equalized),title('Equalied Image Histogram');
+
+All helper functions:-
+function result=getCDF(histogram)
+ result=histogram;
+ for i=2:256
+ result(1,i)=result(1,i)+result(1,i-1);
+ end
+end
+function result=getEqualizedImage(inputImage,intensity)
+%{
+ INPUT: inputImage>Gray Sacale Image; intensity>new Intensity array for each
+ old one
+ OUTPUT: New Gray Scale Image with updated intensity
+%}
+ inputImage=uint16(inputImage);
+ result=inputImage;
+ for i=1:size(result,1)
+ for j=1:size(result,2)
+ index=inputImage(i,j)+1;
+ result(i,j)=intensity(1,index);
+ end
+ end
+ result=uint8(result);
+end

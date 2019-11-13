@@ -1,0 +1,41 @@
+Generate total of 8 images using bit plane technique from a 8 bit gray scale image.
+
+Main Script:-
+inputImage=imread('cat.png');
+gry=convertToGray(inputImage);
+gry1=getBitPlane(gry,1);
+gry2=getBitPlane(gry,2);
+gry3=getBitPlane(gry,3);
+gry4=getBitPlane(gry,4);
+gry5=getBitPlane(gry,5);
+gry6=getBitPlane(gry,6);
+gry7=getBitPlane(gry,7);
+gry8=getBitPlane(gry,8);
+subplot(3,3,1),imshow(gry),title("Gray Image");
+subplot(3,3,2),imshow(gry1),title("Bit Position-1");
+subplot(3,3,3),imshow(gry2),title("Bit Position-2");
+subplot(3,3,4),imshow(gry3),title("Bit Position-3");
+subplot(3,3,5),imshow(gry4),title("Bit Position-4");
+subplot(3,3,6),imshow(gry5),title("Bit Position-5");
+subplot(3,3,7),imshow(gry6),title("Bit Position-6");
+subplot(3,3,8),imshow(gry7),title("Bit Position-7");
+subplot(3,3,9),imshow(gry8),title("Bit Position-8");
+
+All helper functions:-
+function result=getBitPlane(inputImage,bitPosition)
+ height=size(inputImage,1);
+ width=size(inputImage,2);
+ result=zeros(height,width);
+ for i=1:height
+ for j=1:width
+ intensity=de2bi(inputImage(i,j),8,'left-msb');
+ a=bi2de(intensity(bitPosition:bitPosition),'left-msb');
+ if(a==1)
+ result(i,j)=255;
+ else
+ result(i,j)=a;
+ end
+ end
+ end
+ result=uint8(result);
+end

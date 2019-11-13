@@ -1,0 +1,231 @@
+Problem Statement:
+Perform Image enhancement using mask based and pad with same approach using following
+methods:-
+- Max Filter
+- Min Filter
+- Mean Filter
+- Median Filter
+- Mode Filter
+- Geometric Mean Filter
+- Harmonic Mean Filter
+- High-Pass Filtering (Sharpening)
+- Gaussian Mask
+
+
+Main Script:-
+
+inputImage=imread('Bridge.jpg');
+gry=convertToGray(inputImage);
+gryMin=doMinFilter(gry);
+gryMax=doMaxFilter(gry);
+gryMean=doMeanFilter(gry);
+gryMedian=doMedianFilter(gry);
+gryMode=doModeFilter(gry);
+gryHarmonic=doHarmonicMeanFilter(gry);
+gryGeometric=doGeometricMeanFilter(gry);
+grySharp=doSharpeningFilter(gry);
+gryGauss=doGaussianFilter(gry);
+subplot(5,2,1),imshow(gry),title("Gray Image");
+subplot(5,2,2),imshow(gryMin),title("Min Filter");
+subplot(5,2,3),imshow(gryMax),title("Max Filter");
+subplot(5,2,4),imshow(gryMean),title("Mean Filter");
+subplot(5,2,5),imshow(gryMedian),title("Median Filter");
+subplot(5,2,6),imshow(gryMode),title("Modal Filter");
+subplot(5,2,7),imshow(gryHarmonic),title("Harmonic Filter");
+subplot(5,2,8),imshow(gryGeometric),title("Geometric Filter");
+subplot(5,2,9),imshow(grySharp),title("Sharpening Filter");
+subplot(5,2,10),imshow(gryGauss),title("Gaussian Filter");
+
+
+All helper functions:-
+
+function result=padWithSame(inputImage,maskHeight,maskWidth)
+ %{
+ Same usage as per command :-
+ padImage=padarray(inputImage,[1,1],'replicate','both');
+ pad with same will be added after the last column and last row and
+ not before the first column and row.
+ Considering seed point is at top-left corner of the mask.
+ %}
+ inputImage=double(inputImage);
+ [height,width]=size(inputImage);
+ expandedImage=zeros(height+maskHeight-1,width+maskWidth-1);
+
+ expandedImage(1:height,1:width)=inputImage;
+ for i=height+1:size(expandedImage,1)
+ expandedImage(i:i,1:width)=inputImage(height:height,1:width);
+ end
+ for i=width+1:size(expandedImage,2)
+ expandedImage(1:height,i:i)=inputImage(1:height,width:width);
+ end
+
+expandedImage(height+1:size(expandedImage,1),width+1:size(expandedImage,2))=input
+Image(height,width);
+ result=uint8(expandedImage);
+end
+
+
+function result=doMinFilter(inputImage)
+ maskHeight=3;
+ maskWidth=3;
+ padImage=padWithSame(inputImage,maskHeight,maskWidth);
+ result=inputImage;
+ [height,width]=size(inputImage);
+ for i=1:height
+ for j=1:width
+ selectedRegion=padImage(i:i+maskHeight-1,j:j+maskWidth-1);
+ result(i,j)=min(min(selectedRegion));
+ end
+ end
+end
+
+
+function result=doMaxFilter(inputImage)
+ maskHeight=3;
+ maskWidth=3;
+ padImage=padWithSame(inputImage,maskHeight,maskWidth);
+ result=inputImage;
+ [height,width]=size(inputImage);
+ for i=1:height
+ for j=1:width
+ selectedRegion=padImage(i:i+maskHeight-1,j:j+maskWidth-1);
+ result(i,j)=max(max(selectedRegion));
+ end
+ end
+end
+
+
+function result=doMeanFilter(inputImage)
+ maskHeight=3;
+ maskWidth=3;
+ padImage=padWithSame(inputImage,maskHeight,maskWidth);
+ result=inputImage;
+ [height,width]=size(inputImage);
+ padImage=double(padImage);
+ result=double(result);
+ for i=1:height
+ for j=1:width
+ selectedRegion=padImage(i:i+maskHeight-1,j:j+maskWidth-1);
+ result(i,j)=sum(sum(selectedRegion))/(maskWidth*maskHeight);
+ end
+ end
+ result=uint8(result);
+end
+
+
+function result=doModeFilter(inputImage)
+ maskHeight=3;
+ maskWidth=3;
+ padImage=padWithSame(inputImage,maskHeight,maskWidth);
+ result=inputImage;
+ [height,width]=size(inputImage);
+ padImage=double(padImage);
+ result=double(result);
+ for i=1:height
+ for j=1:width
+ selectedRegion=padImage(i:i+maskHeight-1,j:j+maskWidth-1);
+ result(i,j)=mode(reshape(selectedRegion,1,[]));
+ end
+ end
+ result=uint8(result);
+end
+
+
+function result=doMedianFilter(inputImage)
+ maskHeight=3;
+ maskWidth=3;
+ padImage=padWithSame(inputImage,maskHeight,maskWidth);
+ result=inputImage;
+ [height,width]=size(inputImage);
+ padImage=double(padImage);
+ result=double(result);
+ for i=1:height
+ for j=1:width
+ selectedRegion=padImage(i:i+maskHeight-1,j:j+maskWidth-1);
+ result(i,j)=median(reshape(selectedRegion,1,[]));
+ end
+ end
+ result=uint8(result);
+end
+
+
+function result=doGeometricMeanFilter(inputImage)
+ maskHeight=3;
+ maskWidth=3;
+ padImage=padWithSame(inputImage,maskHeight,maskWidth);
+ result=inputImage;
+ [height,width]=size(inputImage);
+ padImage=double(padImage);
+ result=double(result);
+ for i=1:height
+ for j=1:width
+ selectedRegion=padImage(i:i+maskHeight-1,j:j+maskWidth-1);
+ result(i,j)=(prod(prod(selectedRegion)))^(1/(maskHeight*maskWidth));
+ end
+ end
+ result=uint8(result);
+end
+
+
+function result=doHarmonicMeanFilter(inputImage)
+ maskHeight=3;
+ maskWidth=3;
+ padImage=padWithSame(inputImage,maskHeight,maskWidth);
+ result=inputImage;
+ [height,width]=size(inputImage);
+ padImage=double(padImage);
+ result=double(result);
+ for i=1:height
+ for j=1:width
+ selectedRegion=padImage(i:i+maskHeight-1,j:j+maskWidth-1);
+
+result(i,j)=((maskHeight*maskWidth)/(sum(sum(gdivide(1,selectedRegion)))));
+ end
+ end
+ result=uint8(result);
+end
+
+
+function result=doSharpeningFilter(inputImage)
+ sharp_filter=[0,-1/4,0;
+ -1/4,2,-1/4;
+ 0,-1/4,0];
+ maskHeight=3;
+ maskWidth=3;
+ padImage=padWithSame(inputImage,maskHeight,maskWidth);
+ result=inputImage;
+ [height,width]=size(inputImage);
+ padImage=double(padImage);
+ result=double(result);
+ for i=1:height
+ for j=1:width
+ selectedRegion=padImage(i:i+maskHeight-1,j:j+maskWidth-1);
+ result(i,j)=(sum(sum(selectedRegion.*sharp_filter)));
+ end
+ end
+ result=uint8(result);
+end
+
+
+function result=doGaussianFilter(inputImage)
+ mask=[1,2,1;
+ 2,4,2;
+ 1,2,1];
+ mask_sum=sum(sum(mask));
+ maskHeight=3;
+ maskWidth=3;
+ padImage=padWithSame(inputImage,maskHeight,maskWidth);
+ result=inputImage;
+ [height,width]=size(inputImage);
+ padImage=double(padImage);
+ result=double(result);
+ for i=1:height
+ for j=1:width
+ selectedRegion=padImage(i:i+maskHeight-1,j:j+maskWidth-1);
+ result(i,j)=(sum(sum(selectedRegion.*mask)))/mask_sum;
+ end
+ end
+ result=uint8(result);
+end
+
+

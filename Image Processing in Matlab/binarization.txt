@@ -1,0 +1,206 @@
+Problem Statement:
+Perform Image banalization using following methods:
+- OTSU
+- Iterative OTSU
+- Niblack
+- Bernsen
+- Sauvola
+
+
+Main Script:-
+ip=imread('Bridge.jpg');
+gry=convertToGray(ip);
+img_bernsen=applyBernsen(gry);
+img_sauvola=applySauvola(gry);
+img_niblack=applyNiblack(gry);
+img_iterative=applyIterativeThreshold(gry);
+img_otsu=applyOtsu(gry);
+subplot(3,2,1),imshow(gry),title("Source Image");
+subplot(3,2,2),imshow(img_niblack),title("Niblack");
+subplot(3,2,3),imshow(img_sauvola),title("Sauvola");
+subplot(3,2,4),imshow(img_bernsen),title("Bernsen");
+subplot(3,2,5),imshow(img_iterative),title("Iterative OTSU");
+subplot(3,2,6),imshow(img_otsu),title("OTSU");
+
+All helper functions:-
+
+function result=applyBernsen(inputImage)
+ %{
+ Threshold=(Imax+Imin)/2;
+ Imax = max intensity value of selected window
+ Imin = min intensity value of selected window
+ %}
+ inputImage=double(inputImage);
+ result=size(inputImage);
+ maskHeight=20;
+ maskWidth=20;
+ expandedImage=double(padWithSame(inputImage,maskHeight,maskWidth));
+ for i=1:size(inputImage,1)
+ for j=1:size(inputImage,2)
+selectedRegion=expandedImage(i:i+maskHeight-1,j:j+maskWidth-1);
+ Imax=max(max(selectedRegion));
+ Imin=min(min(selectedRegion));
+ Threshold=(Imax+Imin)/2;
+ if(inputImage(i,j)<Threshold)
+ result(i,j)=0;
+ else
+ result(i,j)=255;
+ end
+ end
+ end
+ result=uint8(result);
+end
+
+
+function result=applySauvola(inputImage)
+ %{
+ R= maximum standard deviation of image, 128 for gray scale
+ k parameter ranges between 0<k<=0.5
+ T=mean*(1-k*(1-(std/R))
+ f'(x,y)=0 if f(x,y)<T
+ =255 otherwise
+ %}
+ inputImage=double(inputImage);
+ result=size(inputImage);
+ maskHeight=20;
+ maskWidth=20;
+ R=128;
+ k=0.2;
+ expandedImage=double(padWithSame(inputImage,maskHeight,maskWidth));
+ for i=1:size(inputImage,1)
+ for j=1:size(inputImage,2)
+ selectedRegion=expandedImage(i:i+maskHeight-1,j:j+maskWidth-1);
+ mean=sum(sum(selectedRegion))/(maskHeight*maskWidth);
+ standard_deviation=std(selectedRegion(:));
+ Threshold=mean*(1-k*(1-(standard_deviation/R)));
+ if(inputImage(i,j)<Threshold)
+ result(i,j)=0;
+ else
+ result(i,j)=255;
+ end
+ end
+ end
+ result=uint8(result);
+end
+
+
+function result=applyNiblack(inputImage)
+ %{
+ T(x,y)=mean(x,y)+k*standard_deviation(x,y)
+ k=0.2 by default
+ seed point of window = top-left corner in this case
+ padding = paddig with same
+ %}
+ maskHeight=20;
+ maskWidth=20;
+ k=0.2;
+ inputImage=double(inputImage);
+ result=size(inputImage);
+ expandedImage=double(padWithSame(inputImage,maskHeight,maskWidth));
+for i=1:size(inputImage,1)
+ for j=1:size(inputImage,2)
+ selectedRegion=expandedImage(i:i+maskHeight-1,j:j+maskWidth-1);
+ mean=sum(sum(selectedRegion))/(maskHeight*maskWidth);
+ standard_deviation=std(selectedRegion(:));
+ Threshold=mean+(k*standard_deviation);
+ if(inputImage(i,j)<Threshold)
+ result(i,j)=0;
+ else
+ result(i,j)=255;
+ end
+ end
+ end
+ result=uint8(result);
+end
+
+
+function result=applyOtsu(inputImage)
+ gry_hist=getNormalizedHistogram(inputImage);
+ T=otsuThreshold(gry_hist);
+ height=size(inputImage,1);
+ width=size(inputImage,2);
+ seg_img=zeros(height,width,'uint8');
+ for i=1:height
+ for j=1:width
+ if(inputImage(i,j)<=T)
+ seg_img(i,j)=0;
+ else
+ seg_img(i,j)=255;
+ end
+ end
+ end
+ result=seg_img;
+end
+
+
+function result=getIterativeThreshold(mB,mF,hist)
+ diff=mB-mF;
+ T=0;
+ if(diff<0)
+ diff=diff*(-1);
+ end
+ while(diff>2)
+ T=uint16(round((mB+mF)/2));
+ B=double((1:T));
+ F=double((T+1:256));
+ sumB=dot(B,hist(1:T));
+ sumF=dot(F,hist(T+1:256));
+ mB=sumB/size(B,2);
+ mF=sumF/size(F,2);
+ diff=mB-mF;
+ if(diff<0)
+ diff=diff*(-1);
+ end
+ end
+ result=uint8(T);
+end
+
+
+function level = otsuThreshold(histogramCounts)
+total = sum(histogramCounts);
+% '''total''' is the number of pixels in the given image. 
+%% OTSU automatic thresholding method
+sumB = 0;
+wB = 0;
+maximum = 0.0;
+sum1 = dot( (0:255), histogramCounts);
+for ii=1:256
+ wB = wB + histogramCounts(ii);
+ wF = total - wB;
+ if (wB == 0 || wF == 0)
+ continue;
+ end
+ sumB = sumB + (ii-1) * histogramCounts(ii);
+ mF = (sum1 - sumB) / wF;
+ between = wB * wF * ((sumB / wB) - mF) * ((sumB / wB) - mF);
+ if ( between >= maximum )
+ level = ii;
+ maximum = between;
+ end
+end
+end
+
+
+function result=applyIterativeThreshold(inputImage)
+ height=size(inputImage,1);
+ width=size(inputImage,2);
+ hist_img=getNormalizedHistogram(inputImage);
+ inputImage=double(inputImage);
+sumB=double(inputImage(1,1)+inputImage(1,width)+inputImage(height,1)+inputImage(h
+eight,width));
+ mB=double(sumB/4);
+ sumF=sum(sum(inputImage));
+ mF=double((sumF-sumB)/((height*width)-4));
+ T=getIterativeThreshold(mB,mF,hist_img);
+ result=zeros(height,width,'uint8');
+ for i=1:height
+ for j=1:width
+ if(inputImage(i,j)<=T)
+ result(i,j)=0;
+ else
+ result(i,j)=255;
+ end
+ end
+ end
+ result=uint8(result);
+end

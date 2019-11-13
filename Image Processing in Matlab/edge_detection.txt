@@ -1,0 +1,90 @@
+Detect the edges of the input image using following operators and also show gradient magnitude
+and direction images where applicable:
+- Robert
+- Sobel
+- Prewitt
+- Laplacian
+
+Main Script:-
+
+inputImage=imread('cat.png');
+gry=convertToGray(ip);
+prewittX=[-1,0,1;-1,0,1;-1,0,1];
+prewittY=[-1,-1,-1;0,0,0;1,1,1];
+robertX=[1,0;0,-1];
+robertY=[0,1;-1,0];
+sobelX=[-1,0,1;-2,0,2;-1,0,1];
+sobelY=[-1,-2,-1;0,0,0;1,2,1];
+laplacianMask=[0,1,0;1,-4,1;0,1,0];
+gryPrewittX=applyEdgeMask(gry,prewittX);
+gryPrewittY=applyEdgeMask(gry,prewittY);
+gryPrewittGM=getGradientMagnitude(gryPrewittX,gryPrewittY);
+gryPrewittGD=getGradientDirection(gryPrewittX,gryPrewittY);
+gryRobertX=applyEdgeMask(gry,robertX);
+gryRobertY=applyEdgeMask(gry,robertY);
+gryRobertGM=getGradientMagnitude(gryRobertX,gryRobertY);
+gryRobertGD=getGradientDirection(gryRobertX,gryRobertY);
+grySobelX=applyEdgeMask(gry,sobelX);
+grySobelY=applyEdgeMask(gry,sobelY);
+grySobelGM=getGradientMagnitude(grySobelX,grySobelY);
+grySobelGD=getGradientDirection(grySobelX,grySobelY);
+gryLaplace=applyEdgeMask(gry,laplacianMask);
+subplot(4,4,1),imshow(gry),title("Orginal Image");
+subplot(4,4,2),imshow(gryLaplace),title("Laplacian");
+subplot(4,4,5),imshow(grySobelX),title("Sobel X");
+subplot(4,4,6),imshow(grySobelY),title("Sobel Y");
+subplot(4,4,7),imshow(grySobelGM),title("Sobel Gradient Magnitude");
+subplot(4,4,8),imshow(grySobelGD),title("Sobel Gradient Direction");
+subplot(4,4,9),imshow(gryPrewittX),title("Prewitt X");
+subplot(4,4,10),imshow(gryPrewittY),title("Prewitt Y");
+subplot(4,4,11),imshow(gryPrewittGM),title("Prewitt Gradient Magnitude");
+subplot(4,4,12),imshow(gryPrewittGD),title("Prewitt Gradient Direction");
+subplot(4,4,13),imshow(gryRobertX),title("Robert X");
+subplot(4,4,14),imshow(gryRobertY),title("Robert Y");
+subplot(4,4,15),imshow(gryRobertGM),title("Robert Gradient Magnitude");
+subplot(4,4,16),imshow(gryRobertGD),title("Robert Gradient Direction");
+
+
+All helper functions:-
+
+function result=applyEdgeMask(inputImage,mask)
+ maskHeight=size(mask,1);
+ maskWidth=size(mask,2);
+ padImage=padWithSame(inputImage,maskHeight,maskWidth);
+ result=inputImage;
+ [height,width]=size(inputImage);
+ padImage=double(padImage);
+ result=double(result);
+ for i=1:height
+ for j=1:width
+ selectedRegion=padImage(i:i+maskHeight-1,j:j+maskWidth-1);
+ result(i,j)=(sum(sum(selectedRegion.*mask)));
+ end
+ end
+ result=uint8(result);
+end
+
+
+function result=getGradientMagnitude(Gx,Gy)
+ Gx=double(Gx);
+ Gy=double(Gy);
+ GM=zeros(size(Gx));
+ GM=double(GM);
+ GM(:,:)=sqrt((Gx(:,:).^2)+(Gy(:,:).^2));
+ result=uint8(GM);
+end
+
+
+function result=getGradientDirection(Gx,Gy)
+ Gx=double(Gx);
+ Gy=double(Gy);
+ GD=zeros(size(Gx));
+ GD=double(GD);
+ for i=1:size(GD,1)
+ for j=1:size(GD,2)
+ GD(i,j)=atand(Gy(i,j)/Gx(i,j));
+ end
+ end
+ result=uint8(GD);
+ result=mat2gray(result);
+end

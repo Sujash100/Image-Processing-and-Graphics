@@ -1,0 +1,115 @@
+
+Convert a RGB image into gray scale image. Calculate brightness, contrast of the gray image. Create
+the histogram and normalized histogram of gray image and calculate the brightness and contrast from the
+histogram. Also calculate the aspect ratio of the image, and RAW file size of color image.
+
+Main Script:-
+inputImage=imread('Bridge.jpg');
+aspect_ratio=getAspectRatio(inputImage);
+raw_size=getRAWSize(inputImage);
+gry=convertToGray(inputImage);
+brightness=getBrightness(gry);
+contrast=getContrast(gry);
+histogram=getHistogram(gry);
+normalized_histogram=getNormalizedHistogram(gry);
+H_brightness=getHistogram2Brightness(histogram);
+H_contrast=getHistogram2Contrast(histogram);
+fprintf("\nAspect Ratio: %d:%d",aspect_ratio(1,1),aspect_ratio(1,2));
+fprintf("\nRAW Size: %f",raw_size);
+fprintf("\nBrightness from image: %f",brightness);
+fprintf("\nContrast from image: %f",contrast);
+fprintf("\nBrightness from Histogram: %f",H_brightness);
+fprintf("\nContrast from Histogram: %f",H_contrast);
+subplot(3,1,1),imshow(gry),title("Converted Gray Image");
+subplot(3,1,2),plot(histogram),title("Histogram");
+subplot(3,1,3),plot(normalized_histogram),title("Normalized Histogram");
+
+All helper functions:-
+
+function result=convertToGray(inputImage)
+ inputImage=double(inputImage);
+ result=zeros(size(inputImage,1),size(inputImage,2),'double');
+
+result(:,:)=(0.299*inputImage(:,:,1))+(0.587*inputImage(:,:,2))+(0.114*inputImage
+(:,:,3));
+ result=uint8(result);
+end
+
+
+function result=getAspectRatio(inputImage)
+ height=size(inputImage,1);
+ width=size(inputImage,2);
+ result=zeros(1,2);
+ result(1,1)=width/gcd(height,width);
+ result(1,2)=height/gcd(height,width);
+end
+
+
+function result=getRAWSize(inputImage)
+ height=size(inputImage,1);
+ width=size(inputImage,2);
+ bit_depth=24;
+ result=(height*width*bit_depth)/(8*1024*1024);
+end
+
+
+function result=getBrightness(inputImage)
+ result=0.0;
+ inputImage=double(inputImage);
+ for i=1:size(inputImage,1)
+ for j=1:size(inputImage,2)
+ result=result+inputImage(i,j);
+ end
+ end
+ result=result/(size(inputImage,1)*size(inputImage,2));
+end
+
+function result=getContrast(inputImage)
+ brightness=getBrightness(inputImage);
+ inputImage=double(inputImage);
+ result=0.0;
+ for i=1:size(inputImage,1)
+ for j=1:size(inputImage,2)
+ result=result+(inputImage(i,j)-brightness)*(inputImage(i,j)-
+brightness);
+ end
+ end
+ result=result/(size(inputImage,1)*size(inputImage,2));
+ result=sqrt(result);
+end
+
+function result=getHistogram(inputImage)
+ result=zeros(1,256,'uint16');
+ for i=1:size(inputImage,1)
+ for j=1:size(inputImage,2)
+ result(1,inputImage(i,j)+1)=result(1,inputImage(i,j)+1)+1;
+ end
+ end
+end
+
+function result=getNormalizedHistogram(inputImage)
+ histogram=getHistogram(inputImage);
+ histogram=double(histogram);
+ result=zeros(1,256,'double');
+ result(:,:)=(histogram(:,:)/sum(histogram));
+end
+
+function result=getHistogram2Brightness(histogram) 
+result=0.0;
+ histogram=double(histogram);
+ for i=1:size(histogram,2)
+ result=result+((i-1)*histogram(1,i));
+ end
+ result=result/sum(histogram);
+end
+
+function result=getHistogram2Contrast(histogram)
+ result=0.0;
+ brightness=getHistogram2Brightness(histogram);
+ histogram=double(histogram);
+ for i=1:size(histogram,2)
+ result=result+(histogram(1,i)*(i-1)*(i-1));
+ end
+ result=(result/(sum(histogram)))-(brightness*brightness);
+ result=sqrt(result);
+end
