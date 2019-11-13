@@ -1,0 +1,163 @@
+10. Translation
+import java.awt.*;
+import java.applet.Applet;
+
+import java.util.*;
+
+public class Translation extends Applet
+{
+
+  int x1,y1,x2,y2;
+  int dx,dy,theta;
+Scanner sc=new Scanner(System.in);
+
+public Translation(){
+System.out.println("ENTER X1 Y1: ");
+x1=sc.nextInt();
+y1=sc.nextInt();
+System.out.println("ENTER X2 Y2: ");
+x2=sc.nextInt();
+y2=sc.nextInt();
+System.out.println("ENTER INCREMENT IN X DIRECTION: ");
+dx=sc.nextInt();
+System.out.println("ENTER INCREMENT IN Y DIRECTION: ");
+dy=sc.nextInt();
+}
+   public void paint(Graphics g)
+  {  
+    
+
+
+g.setColor(Color.BLUE);
+g.drawLine(x1,y1,x2,y2);
+
+g.setColor(Color.RED);
+g.drawLine(x1+dx,y1+dy,x2+dx,y2+dy);
+
+
+
+  }
+}
+
+
+
+
+ROTATION:
+
+import java.awt.*;
+import java.applet.Applet;
+import java.lang.Math;
+import java.util.*;
+
+public class Rotation extends Applet
+{
+
+  int x1,y1,x2,y2;
+  int theta;
+Scanner sc=new Scanner(System.in);
+
+public Rotation(){
+System.out.println("ENTER X1 Y1: ");
+x1=sc.nextInt();
+y1=sc.nextInt();
+System.out.println("ENTER value of theta: ");
+theta=sc.nextInt();
+}
+   public void paint(Graphics g)
+  {  
+   
+x2=((int)(x1*Math.cos(theta*Math.PI/180)))-((int)(y1*Math.sin(theta*Math.PI/180)));
+y2=((int)(x1*Math.sin(theta*Math.PI/180)))+((int)(y1*Math.cos(theta*Math.PI/180)));
+
+
+g.setColor(Color.BLUE);
+g.drawLine(0,0,x1,y1);
+
+g.setColor(Color.RED);
+g.drawLine(0,0,x2,y2);
+
+
+
+
+  }
+}
+
+
+SCALING :
+
+import java.awt.*;
+import java.applet.Applet;
+import java.lang.*;
+import java.util.*;
+
+public class Scaling extends Applet
+{
+
+  int x1,y1,x2,y2,x3,y3,x4,y4;
+  int tx,ty,theta,sx,sy;
+Scanner sc=new Scanner(System.in);
+
+public Scaling(){
+System.out.println("ENTER X1 Y1: ");
+x1=sc.nextInt();
+y1=sc.nextInt();
+System.out.println("ENTER X2 Y2: ");
+x2=sc.nextInt();
+y2=sc.nextInt();
+System.out.println("ENTER tx ty: ");
+sx=sc.nextInt();
+sy=sc.nextInt();
+
+}
+   public void paint(Graphics g)
+  {  
+
+
+g.setColor(Color.RED);
+g.drawLine(x1,y1,x2,y2);
+//for scaling
+
+
+x3=sx*x1; x4=sx*x2;
+y3=sy*y1; y4=sy*y2;
+
+g.setColor(Color.GREEN);
+g.drawLine(x3,y3,x4,y4);
+
+
+
+  }
+}
+
+
+REFLECTION :
+import java.awt.*;
+import java.applet.Applet;
+
+import java.util.*;
+
+public class Reflection extends Applet
+{
+
+  int x1,y1,x2,y2;
+  int dx,dy,theta;
+Scanner sc=new Scanner(System.in)
+
+public Reflection(){
+System.out.println("ENTER X1 Y1: ");
+x1=sc.nextInt();
+y1=sc.nextInt();
+System.out.println("ENTER X2 Y2: ");
+x2=sc.nextInt();
+y2=sc.nextInt();
+}
+   public void paint(Graphics g)
+  {  
+g.setColor(Color.BLUE);
+g.drawLine(x1,y1,x2,y2);
+
+
+g.setColor(Color.RED);
+g.drawLine(y1,x1,y2,x2);
+  }
+}
